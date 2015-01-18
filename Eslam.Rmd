@@ -1,0 +1,63 @@
+---
+title: "RepData_Assignment_1"
+author: "Eslam M. Abdel-Salam"
+date: "Saturday, January 10, 2015"
+output: html_document
+---
+
+Firstly, I am going to load the data will be used in the rest of analysis.To manipulate data, easily, I will load "dplyr" package. Then, I will transfrom the data to be more readable.
+
+```{r}
+library(plyr)
+library(dplyr)
+activity_data <- read.csv("activity.csv")
+tbl_df(activity_data)
+```
+
+Secondly, I am going to answer some questions concerning the loaded data.
+
+##What is mean total number of steps taken per day?
+
+Here is a histogram showing the total number of steps taken each day...
+```{r, echo = TRUE}
+library(lattice)
+barchart(steps ~ date, data = activity_data, main = "Total number of steps taken each day", ylab = "Steps", xlab = "Days", col = "green", scale=list(x=list(rot=45)))
+```
+
+The following code will show the mean and median for each total number of steps taken each day.
+```{r}
+daily_mean <- aggregate(steps ~ date, data = activity_data, FUN=function(activity_data) c(mean = mean(activity_data, na.rm = TRUE), median = median(activity_data, na.rm = TRUE)))
+print(daily_mean)
+```
+
+##What is the average daily activity pattern?
+
+The following plot showing the 5-minute interval and the average number of steps taken, averaged across all days...
+```{r, echo = TRUE}
+interval_steps <- aggregate(steps ~ interval, data = activity_data, FUN=function(activity_data) mean = mean(activity_data, na.rm = TRUE))
+plot(interval_steps$interval, interval_steps$steps, type = "l", xlab = "Interval (Secs)", ylab = "Steps", main = "Average number of steps taken daily each 5 seconds daily", col = "blue")
+```
+
+The previous plot showed that maximum number of steps (averaged across all days) was taken around 835 secs interval.
+
+##Imputing missing values
+
+The following code aims to calculate the total number of incomplete rows i.e. observations with NA values.
+```{r}
+na_sum <- nrow(activity_data) - sum(is.na(activity_data$steps))
+```
+The total number of incomplete observations in our data set is 15264 observations.
+
+Now, we are going to replace all of the NA values with the intger 0 to create a new data set without any NA values.
+```{r}
+activity_data[is.na(activity_data)] <- 0
+```
+
+To study the effect of replacing NAs with 0s, we will draw the samehistogram showing the total number of steps taken each day. Moreover, we will calculate the ean and median for each total number of steps taken each day.
+```{r, echo = TRUE}
+ barchart(steps ~ date, data = activity_data, main = "Total number of steps taken each day", ylab = "Steps", xlab = "Days", col = "green", scale=list(x=list(rot=45)))
+ daily_mean_without_NAs <- aggregate(steps ~ date, data = activity_data, FUN=function(activity_data) c(mean = mean(activity_data, na.rm = TRUE), median = median(activity_data, na.rm = TRUE)))
+print(daily_mean_without_NAs)
+```
+
+The previous histogram and data table showing that there are no differences between the mean and median of steps takeneach day before and after imputting the NA values. However, replacing the NAs has a little impact on the mean of some days which were all have NA values making it showing a mean of zero rather than NA.
